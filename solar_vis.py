@@ -54,7 +54,7 @@ def scale_y(y):
     **y** — y-координата модели.
     """
 
-    return y  -(int(y*scale_factor) + window_height//2 - window_height)
+    return int(-y*scale_factor + window_height//2)
 
 
 
