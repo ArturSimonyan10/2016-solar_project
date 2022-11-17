@@ -6,6 +6,11 @@ from tkinter.filedialog import *
 from solar_vis import *
 from solar_model import *
 from solar_input import *
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.DataFrame(columns=['abs(v)', 't', 'r'])
+
 
 perform_execution = False
 """Флаг цикличности выполнения расчёта"""
@@ -36,7 +41,11 @@ def execution():
     global displayed_time
     recalculate_space_objects_positions(space_objects, time_step.get())
     for body in space_objects:
+        if body.type == "planet":
+            new_row = [float((body.Vx ** 2 + body.Vy ** 2) ** 0.5), float(physical_time), float((body.x ** 2 + body.y ** 2)**0.5)]
+            df.loc[ len(df.index )] = new_row
         update_object_position(space, body)
+
     physical_time += time_step.get()
     displayed_time.set("%.1f" % physical_time + " seconds gone")
 
@@ -66,6 +75,11 @@ def stop_execution():
     start_button['text'] = "Start"
     start_button['command'] = start_execution
     print('Paused execution.')
+    df.plot(x = "t", y = "abs(v)")
+    df.plot(x="t", y="r")
+    df.plot(x="r", y="abs(v)")
+    plt.show()
+    df.to_csv("stat.csv")
 
 
 def open_file_dialog():
@@ -144,7 +158,6 @@ def main():
     displayed_time.set(str(physical_time) + " seconds gone")
     time_label = tkinter.Label(frame, textvariable=displayed_time, width=30)
     time_label.pack(side=tkinter.RIGHT)
-
     root.mainloop()
     print('Modelling finished!')
 
