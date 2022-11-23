@@ -5,11 +5,9 @@ import tkinter
 from tkinter.filedialog import *
 from solar_vis import *
 from solar_model import *
+from solar_statistic import *
 from solar_input import *
-import pandas as pd
-import matplotlib.pyplot as plt
 
-df = pd.DataFrame(columns=['abs(v)', 't', 'r'])
 
 
 perform_execution = False
@@ -41,12 +39,13 @@ def execution():
     global displayed_time
     recalculate_space_objects_positions(space_objects, time_step.get())
     for body in space_objects:
-        if body.type == "planet":
-            new_row = [float((body.Vx ** 2 + body.Vy ** 2) ** 0.5), float(physical_time), float((body.x ** 2 + body.y ** 2)**0.5)]
-            df.loc[ len(df.index )] = new_row
         update_object_position(space, body)
 
+    if len(space_objects) == 2 and (space_objects[0].type == "planet" or space_objects[1].type == "planet"):
+        get_data(space_objects, physical_time)
+
     physical_time += time_step.get()
+
     displayed_time.set("%.1f" % physical_time + " seconds gone")
 
     if perform_execution:
@@ -74,12 +73,11 @@ def stop_execution():
     perform_execution = False
     start_button['text'] = "Start"
     start_button['command'] = start_execution
+    save_data()
+    save_plots('time', 'velocity')
+    save_plots('time', 'distance')
+    save_plots('distance', 'velocity')
     print('Paused execution.')
-    df.plot(x = "t", y = "abs(v)")
-    df.plot(x="t", y="r")
-    df.plot(x="r", y="abs(v)")
-    plt.show()
-    df.to_csv("stat.csv")
 
 
 def open_file_dialog():
